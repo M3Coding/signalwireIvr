@@ -25,13 +25,13 @@ await voiceClient.listen({
         console.log("Incoming call from:", call.from);//displays who is calling from the JSON information. Call object represents an active call. 
         
         
-        await sleep(7000);
+        /* await sleep(7000); */
         /* await call.playTTS({
             text: "Thank you for call Coding 4 Life Corp! Listen for the following menu options."
         });//play text to speech information */
         async function mainMenu(call) {
             const prompts = await call.promptTTS ({
-            text: `<speak>Thank you for calling Coding 4 Life Corp., Please listen to the following menu options: For general information press 1, for hours press 2, and for support press 3. </speak>`,
+            text: `<speak>Thank you for calling Coding 4 Life Corp., Please listen to the following menu options: For general information press 1, for support press 2, and to leave a voicemail press 3. </speak>`,
             digits: {
                 max: 1,
                 digitTimeout: 10,
@@ -53,24 +53,40 @@ Coding 4 Life Corp is a technology-driven organization focused on creating innov
 
 Founded and led by Matthew Eady, an experienced IT professional and passionate developer, Coding 4 Life Corp is built on a commitment to excellence, integrity, and innovation. Under Matthews leadership, we aim to bridge the gap between technology and everyday life by delivering user-friendly, scalable, and impactful solutions.
 
-At Coding 4 Life Corp, we believe in coding with purpose. Back to the main menu!</speak>`
+At Coding 4 Life Corp, we believe in coding with purpose. Our service hours are from 8:00 AM to 9:00 PM Eastern Time. If you are reaching out outside of these hours, we will get back to you as soon as we're available. We appreciate your patience! Back to the main menu! Back to the main menu!</speak>`
                })
                await sleep(2000);
                await mainMenu(call); //return main menu
                break;
             case '2':
-                await call.playTTS({
-                text: `<speak>Thank you for contacting us. Our service hours are from 8:00 AM to 9:00 PM Eastern Time. If you are reaching out outside of these hours, we will get back to you as soon as we're available. We appreciate your patience! Back to the main menu!</speak>`
-               })
-               await sleep(2000);
-               await mainMenu(call);
+               await call.connectPhone({
+                    to: supportNumber,
+                })
                break;
                
             case '3':
-                await call.connectPhone({
-                    to: supportNumnber,
+                await call.playTTS({
+                    text: "<speak>Please record your message after the beep and press pound or end the call!</speak>"
                 })
+                await call.recordAudio({
+                    beep: true,
+                    format: "mp3",
+                    direction: "speak",
+                    intialTimeout: 0,
+                    endSilenceTimeout: 3,
+                    terminators: "#",
+                    stereo: true,
+                    listen: {
+                        onStarted: async (recording) => {
+                            console.log("Recording Started", recording.url);
+                        }
+                    },
+                    
+                    
                 
+                // record user input
+                
+        });
                 break;
             default:
                 await call.playTTS({ text: 'Invalid selection. Goodbye.' });
